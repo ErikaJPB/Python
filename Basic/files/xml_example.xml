@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<person gender="female">
+  <name>Erika</name>
+  <country>Colombia</country>
+  <city>Bogota</city>
+  <skills>
+    <skill>JavaScript</skill>
+    <skill>React</skill>
+    <skill>Python</skill>
+  </skills>
+</person>
