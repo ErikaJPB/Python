@@ -1,0 +1,5 @@
+print("April 5, 2024")
+print("I'm feeling hopeful")
+print("I want to learn python")
+print("you can do it")
+print("👩🏻‍💻")
