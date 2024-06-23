@@ -1,3 +1,5 @@
+# Data types
+
 # VARIABLES
 
 name = 'Erlich Bachman'

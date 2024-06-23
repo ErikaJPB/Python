@@ -1,3 +1,5 @@
+# Magic Ball
+
 import random
 
 question = input('Question: ')
