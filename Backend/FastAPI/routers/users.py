@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 
-app = FastAPI()
+router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
 
 
 # start the server : python -m uvicorn users:app --reload
-
 
 
 # USER
@@ -27,22 +26,22 @@ users_list = [
 ]
 
 
-@app.get("/usersjson")
-async def usersjson():
-    return [{"name" : 'Erika', "lastname" : "Pineda", "age" : 30 },
-            {"name" : 'Juan', "lastname" : "Perez", "age" : 26 }, 
-            {"name" : 'Diego', "lastname" : "Alvarez", "age" : 34 },
-            {"name" : 'Andrea', "lastname" : "Ortiz", "age" : 23 },
-            {"name" : 'Fabian', "lastname" : "Jimenez", "age" : 32 }]
+# @router.get("/usersjson")
+# async def usersjson():
+#     return [{"name" : 'Erika', "lastname" : "Pineda", "age" : 30 },
+#             {"name" : 'Juan', "lastname" : "Perez", "age" : 26 }, 
+#             {"name" : 'Diego', "lastname" : "Alvarez", "age" : 34 },
+#             {"name" : 'Andrea', "lastname" : "Ortiz", "age" : 23 },
+#             {"name" : 'Fabian', "lastname" : "Jimenez", "age" : 32 }]
 
 # Get users
-@app.get("/users", response_model=list[User])
+@router.get("/", response_model=list[User])
 async def get_users():
     return users_list
 
 
 # Get user by id - Path
-@app.get("/user/{id}", response_model=User)
+@router.get("/{id}", response_model=User)
 async def get_user_by_id(id: int):
     user = search_user(id)
     if not user:
@@ -52,7 +51,7 @@ async def get_user_by_id(id: int):
    
 
 # Get user by query
-@app.get("/user/", response_model=User)
+@router.get("/user/", response_model=User)
 async def get_user_by_query(id: int) :
     user = search_user(id)
     if not user:
@@ -60,7 +59,7 @@ async def get_user_by_query(id: int) :
     return user
 
 # Create user
-@app.post("/user/", response_model=User, status_code=201)
+@router.post("/user/", response_model=User, status_code=201)
 async def create_user(user: User):
     if search_user(user.id):
         raise HTTPException(status_code=400, detail="User already exists")
@@ -68,7 +67,7 @@ async def create_user(user: User):
     return user
 
 # Update user
-@app.put("/user/", response_model=User)
+@router.put("/user/", response_model=User)
 async def update_user(user: User):
     for index, saved_user in enumerate(users_list):
         if saved_user.id == user.id:
@@ -78,7 +77,7 @@ async def update_user(user: User):
     
   
 # Delete user
-@app.delete("/user/{id}", response_model=dict)
+@router.delete("/user/{id}", response_model=dict)
 async def delete_user(id: int):
     for index, saved_user in enumerate(users_list):
         if saved_user.id == id:
