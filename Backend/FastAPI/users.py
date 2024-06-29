@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 
@@ -35,64 +35,61 @@ async def usersjson():
             {"name" : 'Andrea', "lastname" : "Ortiz", "age" : 23 },
             {"name" : 'Fabian', "lastname" : "Jimenez", "age" : 32 }]
 
-
-@app.get("/users")
-async def users():
+# Get users
+@app.get("/users", response_model=list[User])
+async def get_users():
     return users_list
 
-# Path
-@app.get("/user/{id}")
-async def user(id: int):
-    return search_user(id)
+
+# Get user by id - Path
+@app.get("/user/{id}", response_model=User)
+async def get_user_by_id(id: int):
+    user = search_user(id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
    
-# Query
-@app.get("/user/")
-async def user(id: int) :
-    return search_user(id)
 
+# Get user by query
+@app.get("/user/", response_model=User)
+async def get_user_by_query(id: int) :
+    user = search_user(id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
-@app.post("/user/")
-async def user(user: User):
-    if type(search_user(user.id)) == User:
-        return {"error": "User already exists"}
- 
+# Create user
+@app.post("/user/", response_model=User, status_code=201)
+async def create_user(user: User):
+    if search_user(user.id):
+        raise HTTPException(status_code=400, detail="User already exists")
     users_list.append(user)
     return user
 
-
-@app.put("/user/")
-async def user(user: User):
-    found = False
+# Update user
+@app.put("/user/", response_model=User)
+async def update_user(user: User):
     for index, saved_user in enumerate(users_list):
         if saved_user.id == user.id:
-            users_list[index] = user 
-            found = True
+            users_list[index] = user
+            return user
+    raise HTTPException(status_code=404, detail="User not found")
     
-    if not found:
-        return {"error": "User not found"}
-   
-    return user
-
-
-@app.delete("/user/{id}")
-async def user(id: int):
-    found = False
-    
+  
+# Delete user
+@app.delete("/user/{id}", response_model=dict)
+async def delete_user(id: int):
     for index, saved_user in enumerate(users_list):
         if saved_user.id == id:
             del users_list[index]
-            found = True
-            
-    if not found:
-        return {"error": "User not found"}
-    
-    return {"message": "User deleted successfully"}
-
-    
-
-def search_user(id: int):
-    users = filter(lambda user: user.id == id, users_list)
-    try:
-        return list(users)[0]
-    except:
-        return {"error": "User not found" }
+            return {"message": "User deleted successfully"}
+    raise HTTPException(status_code=404, detail="User not found")
+          
+  
+# Search user function
+def search_user(id: int) -> User | None:
+    for user in users_list:
+        if user.id == id:
+            return user
+    return None
